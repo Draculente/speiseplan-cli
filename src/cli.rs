@@ -49,7 +49,7 @@ impl Cli {
                     .add_monad("language", context.config.language.as_ref())
                     .add("location", context.config.location_codes.join(","))
                     .add(
-                        "excludeAllergens",
+                        "exclude_allergens",
                         context.config.exclude_allergens.join(",")
                     )
                     .add("date", context.date.format("%+"))

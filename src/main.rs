@@ -40,6 +40,7 @@ fn run() -> anyhow::Result<()> {
 
 fn fetch_output(cli: Cli, context: Context) -> anyhow::Result<String> {
     let url = cli.get_full_url(&context);
+    //dbg!(&url);
     let response = reqwest::blocking::get(url)?;
     let data = match cli.command() {
         Command::Meals(_) => response.json::<Data<Vec<Meal>>>()?.render(&context),
