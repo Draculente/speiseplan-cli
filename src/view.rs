@@ -1,3 +1,4 @@
+use crate::cli::CliCommand;
 use crate::config::Config;
 use crate::model::Allergen;
 use crate::model::Data;
@@ -9,32 +10,18 @@ use chrono::DateTime;
 use chrono::Local;
 use console::Style;
 
-#[derive(Eq, PartialEq)]
-enum DisplayStyle {
-    Short,
-    Long,
-}
-
 pub struct Context {
     pub config: Config,
-    style: DisplayStyle,
+    command: CliCommand,
     pub date: DateTime<Local>,
 }
 
 impl Context {
-    pub fn new(config: Config, date: DateTime<Local>) -> Self {
+    pub fn new(config: Config, date: DateTime<Local>, command: CliCommand) -> Self {
         Self {
             config,
-            style: DisplayStyle::Long,
+            command,
             date,
-        }
-    }
-
-    fn short(&self) -> Self {
-        Self {
-            config: self.config.clone(),
-            style: DisplayStyle::Short,
-            date: self.date,
         }
     }
 }
@@ -58,7 +45,7 @@ impl View for Allergen {
 impl View for Location {
     fn render(&self, context: &Context) -> String {
         let italic = Style::new().italic();
-        if context.style == DisplayStyle::Long {
+        if context.command == CliCommand::Locations {
             format!(
                 "{} {} ({})\n{}",
                 self.city,
@@ -69,7 +56,9 @@ impl View for Location {
                         .map(|e| e.render(context))
                         .collect::<Vec<_>>()
                         .join(", ")
-                }else {"Error".to_owned()})
+                } else {
+                    "Error".to_owned()
+                })
             )
         } else {
             format!("{} {}", self.name, self.city)
@@ -92,7 +81,7 @@ impl View for Meal {
             emoji,
             self.name,
             self.price.render(context),
-            italic.apply_to(&self.location.render(&context.short()))
+            italic.apply_to(&self.location.render(context))
         )
     }
 }

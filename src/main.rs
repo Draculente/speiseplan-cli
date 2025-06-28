@@ -1,6 +1,6 @@
 use dirs::config_dir;
-use crate::cli::Cli;
-use crate::cli::Command;
+use speiseplan_cli::cli::Cli;
+use speiseplan_cli::cli::CliCommand;
 use clap::Parser;
 use speiseplan_cli::config::Config;
 use speiseplan_cli::model::Allergen;
@@ -11,12 +11,6 @@ use speiseplan_cli::view::Context;
 use speiseplan_cli::view::View;
 use anyhow::anyhow;
 
-/*
- * TODO: Ich möchte ein anderes Datum als heute angeben können
- * TODO: Für die Allergene und die Location sollte keine voll ausgefüllte Config notwendig sein
- */
-
-mod cli;
 
 fn main() {
     if let Err(e) = run() {
@@ -31,7 +25,7 @@ fn run() -> anyhow::Result<()> {
 
     let cli = Cli::parse();
 
-    let context = Context::new(config.clone(), cli.date()?);
+    let context = Context::new(config.clone(), cli.date()?, cli.command().clone());
 
     print!("{}", fetch_output(cli, context)?);
 
@@ -43,9 +37,9 @@ fn fetch_output(cli: Cli, context: Context) -> anyhow::Result<String> {
     //dbg!(&url);
     let response = reqwest::blocking::get(url)?;
     let data = match cli.command() {
-        Command::Meals(_) => response.json::<Data<Vec<Meal>>>()?.render(&context),
-        Command::Locations => response.json::<Data<Vec<Location>>>()?.render(&context),
-        Command::Allergens => response.json::<Data<Vec<Allergen>>>()?.render(&context),
+        CliCommand::Meals(_) => response.json::<Data<Vec<Meal>>>()?.render(&context),
+        CliCommand::Locations => response.json::<Data<Vec<Location>>>()?.render(&context),
+        CliCommand::Allergens => response.json::<Data<Vec<Allergen>>>()?.render(&context),
     };
 
     Ok(data)

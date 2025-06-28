@@ -8,8 +8,8 @@ use chrono::Weekday;
 use clap::Args;
 use clap::Parser;
 use clap::Subcommand;
-use speiseplan_cli::url::UrlParams;
-use speiseplan_cli::view::Context;
+use crate::url::UrlParams;
+use crate::view::Context;
 
 #[derive(Args, Debug, Clone, PartialEq, Eq)]
 pub struct MealArgs {
@@ -18,7 +18,7 @@ pub struct MealArgs {
 }
 
 #[derive(Subcommand, Clone, Debug, PartialEq, Eq)]
-pub enum Command {
+pub enum CliCommand {
     Meals(MealArgs),
     Locations,
     Allergens,
@@ -28,20 +28,20 @@ pub enum Command {
 #[command(author, version, about, long_about = None)]
 pub struct Cli {
     #[command(subcommand)]
-    command: Option<Command>,
+    command: Option<CliCommand>,
 }
 
 impl Cli {
-    pub fn command(&self) -> Command {
+    pub fn command(&self) -> CliCommand {
         self.command
             .clone()
-            .unwrap_or(Command::Meals(MealArgs { day: None }))
+            .unwrap_or(CliCommand::Meals(MealArgs { day: None }))
     }
 
     pub fn get_full_url(&self, context: &Context) -> String {
         let url_params = UrlParams::new();
         let appendix = match self.command() {
-            Command::Meals(_) => format!(
+            CliCommand::Meals(_) => format!(
                 "/meals{}",
                 url_params
                     .add_monad("vegan", context.config.vegan)
@@ -55,8 +55,8 @@ impl Cli {
                     .add("date", context.date.format("%+"))
                     .build()
             ),
-            Command::Locations => format!("/locations"),
-            Command::Allergens => {
+            CliCommand::Locations => format!("/locations"),
+            CliCommand::Allergens => {
                 format!(
                     "/allergens{}",
                     UrlParams::new()
@@ -72,7 +72,7 @@ impl Cli {
 
     pub fn date(&self) -> anyhow::Result<DateTime<Local>> {
         let now = chrono::Local::now();
-        if let Command::Meals(meal_args) = self.command() {
+        if let CliCommand::Meals(meal_args) = self.command() {
             if let Some(day) = meal_args.day {
                 let day = workdays::parse_weekday(day.as_str())
                     .ok_or(anyhow!("Failed to parse weekday."))?;
