@@ -1,51 +1,128 @@
+#on:
+  #push:
+    #tags:
+      #- "*"
+
+#jobs:
+  #build-and-release:
+    #runs-on: ubuntu-latest
+    #steps:
+      #- uses: actions/checkout@master
+      #- name: Compile
+        #id: compile
+        #uses: rust-build/rust-build.action@v1.4.5
+        #with:
+          #RUSTTARGET: x86_64-pc-windows-gnu
+          #UPLOAD_MODE: none
+          #TOOLCHAIN_VERSION: 1.70.0
+      #- name: Upload artifact
+        #uses: actions/upload-artifact@v4
+        #with:
+          #name: Binary
+          #path: |
+            #${{ steps.compile.outputs.BUILT_ARCHIVE }}
+            #${{ steps.compile.outputs.BUILT_CHECKSUM }}
+
+      #- name: Compile
+        #id: compile2
+        #uses: rust-build/rust-build.action@v1.4.5
+        #with:
+          #RUSTTARGET: x86_64-unknown-linux-musl
+          #UPLOAD_MODE: none
+          #TOOLCHAIN_VERSION: 1.70.0
+      #- name: Upload artifact
+        #uses: actions/upload-artifact@v4
+        #with:
+          #name: Binary
+          #path: |
+            #${{ steps.compile2.outputs.BUILT_ARCHIVE }}
+            #${{ steps.compile2.outputs.BUILT_CHECKSUM }}
+      #- name: Release
+        #uses: "marvinpinto/action-automatic-releases@latest"
+        #with:
+          #repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          #automatic_release_tag: ${{ github.ref_name }}
+          #draft: true
+          #title: ${{ github.ref_name }}
+          #files: |
+            #${{ steps.compile.outputs.BUILT_ARCHIVE }}
+            #${{ steps.compile.outputs.BUILT_CHECKSUM }}
+            #${{ steps.compile2.outputs.BUILT_ARCHIVE }}
+            #${{ steps.compile2.outputs.BUILT_CHECKSUM }}
+name: Deploy
+
 on:
   push:
     tags:
-      - "*"
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: write
 
 jobs:
-  build-and-release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      - name: Compile
-        id: compile
-        uses: rust-build/rust-build.action@v1.4.5
-        with:
-          RUSTTARGET: x86_64-pc-windows-gnu
-          UPLOAD_MODE: none
-          TOOLCHAIN_VERSION: 1.70.0
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Binary
-          path: |
-            ${{ steps.compile.outputs.BUILT_ARCHIVE }}
-            ${{ steps.compile.outputs.BUILT_CHECKSUM }}
+  build-and-upload:
+    name: Build and upload
+    runs-on: ${{ matrix.os }}
 
-      - name: Compile
-        id: compile2
-        uses: rust-build/rust-build.action@v1.4.5
+    strategy:
+      matrix:
+        # You can add more, for any target you'd like!
+        include:
+          - build: linux
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+
+          - build: macos
+            os: macos-latest
+            target: x86_64-apple-darwin
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get the release version from the tag
+        shell: bash
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Install Rust
+        # Or @nightly if you want
+        uses: dtolnay/rust-toolchain@stable
+        # Arguments to pass in
         with:
-          RUSTTARGET: x86_64-unknown-linux-musl
-          UPLOAD_MODE: none
-          TOOLCHAIN_VERSION: 1.70.0
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+          # Make Rust compile to our target (defined in the matrix)
+          targets: ${{ matrix.target }}
+
+      - name: Build
+        uses: actions-rs/cargo@v1
         with:
-          name: Binary
-          path: |
-            ${{ steps.compile2.outputs.BUILT_ARCHIVE }}
-            ${{ steps.compile2.outputs.BUILT_CHECKSUM }}
+          use-cross: true
+          command: build
+          args: --verbose --release --target ${{ matrix.target }}
+
+      - name: Build archive
+        shell: bash
+        run: |
+          # Replace with the name of your binary
+          binary_name="<BINARY_NAME>"
+
+          dirname="$binary_name-${{ env.VERSION }}-${{ matrix.target }}"
+          mkdir "$dirname"
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            mv "target/${{ matrix.target }}/release/$binary_name.exe" "$dirname"
+          else
+            mv "target/${{ matrix.target }}/release/$binary_name" "$dirname"
+          fi
+
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            7z a "$dirname.zip" "$dirname"
+            echo "ASSET=$dirname.zip" >> $GITHUB_ENV
+          else
+            tar -czf "$dirname.tar.gz" "$dirname"
+            echo "ASSET=$dirname.tar.gz" >> $GITHUB_ENV
+          fi
+
       - name: Release
-        uses: "marvinpinto/action-automatic-releases@latest"
+        uses: softprops/action-gh-release@v1
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: ${{ github.ref_name }}
-          draft: true
-          title: ${{ github.ref_name }}
           files: |
-            ${{ steps.compile.outputs.BUILT_ARCHIVE }}
-            ${{ steps.compile.outputs.BUILT_CHECKSUM }}
-            ${{ steps.compile2.outputs.BUILT_ARCHIVE }}
-            ${{ steps.compile2.outputs.BUILT_CHECKSUM }}
+            ${{ env.ASSET }}
