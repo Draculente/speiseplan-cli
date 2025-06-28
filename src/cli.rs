@@ -82,8 +82,8 @@ impl Cli {
             }
         }
         let show_day = if now.hour() >= 15 {
-            if now.weekday() == Weekday::Fri {
-                now.checked_add_days(Days::new(3))
+            if now.weekday().is_weekend() || now.weekday() == Weekday::Fri {
+                now.checked_add_days(Days::new(Weekday::Mon.days_since(now.weekday()).into()))
                     .expect("There is a next monday.")
             } else {
                 now.checked_add_days(Days::new(1))
@@ -95,3 +95,24 @@ impl Cli {
         Ok(show_day)
     }
 }
+
+
+trait Weekend {
+    fn is_weekend(&self) -> bool;
+}
+
+impl Weekend for Weekday {
+    fn is_weekend(&self) -> bool {
+        match self {
+            Weekday::Mon => false,
+            Weekday::Tue => false,
+            Weekday::Wed => false,
+            Weekday::Thu => false,
+            Weekday::Fri => false,
+            Weekday::Sat => true,
+            Weekday::Sun => true,
+        }
+    }
+}
+
+
