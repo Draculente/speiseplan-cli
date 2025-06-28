@@ -1,60 +1,9 @@
-#on:
-  #push:
-    #tags:
-      #- "*"
-
-#jobs:
-  #build-and-release:
-    #runs-on: ubuntu-latest
-    #steps:
-      #- uses: actions/checkout@master
-      #- name: Compile
-        #id: compile
-        #uses: rust-build/rust-build.action@v1.4.5
-        #with:
-          #RUSTTARGET: x86_64-pc-windows-gnu
-          #UPLOAD_MODE: none
-          #TOOLCHAIN_VERSION: 1.70.0
-      #- name: Upload artifact
-        #uses: actions/upload-artifact@v4
-        #with:
-          #name: Binary
-          #path: |
-            #${{ steps.compile.outputs.BUILT_ARCHIVE }}
-            #${{ steps.compile.outputs.BUILT_CHECKSUM }}
-
-      #- name: Compile
-        #id: compile2
-        #uses: rust-build/rust-build.action@v1.4.5
-        #with:
-          #RUSTTARGET: x86_64-unknown-linux-musl
-          #UPLOAD_MODE: none
-          #TOOLCHAIN_VERSION: 1.70.0
-      #- name: Upload artifact
-        #uses: actions/upload-artifact@v4
-        #with:
-          #name: Binary
-          #path: |
-            #${{ steps.compile2.outputs.BUILT_ARCHIVE }}
-            #${{ steps.compile2.outputs.BUILT_CHECKSUM }}
-      #- name: Release
-        #uses: "marvinpinto/action-automatic-releases@latest"
-        #with:
-          #repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          #automatic_release_tag: ${{ github.ref_name }}
-          #draft: true
-          #title: ${{ github.ref_name }}
-          #files: |
-            #${{ steps.compile.outputs.BUILT_ARCHIVE }}
-            #${{ steps.compile.outputs.BUILT_CHECKSUM }}
-            #${{ steps.compile2.outputs.BUILT_ARCHIVE }}
-            #${{ steps.compile2.outputs.BUILT_CHECKSUM }}
 name: Deploy
 
 on:
   push:
     tags:
-      - "[0-9]+.[0-9]+.[0-9]+"
+      - "*"
 
 permissions:
   contents: write
