@@ -39,11 +39,11 @@ jobs:
       - name:  Install openssl
         run:   |
          if [ "$RUNNER_OS" == "Linux" ]; then
-              apt install openssl
+              sudo apt install -y openssl
          elif [ "$RUNNER_OS" == "Windows" ]; then
               choco install openssl
          elif [  "$RUNNER_OS" == "macOS"  ]; then
-              homebrew install openssl
+              brew install openssl
          else
               echo "Runner os not supported"
               exit 1
