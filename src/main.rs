@@ -35,11 +35,12 @@ fn run() -> anyhow::Result<()> {
 fn fetch_output(cli: Cli, context: Context) -> anyhow::Result<String> {
     let url = cli.get_full_url(&context);
     //dbg!(&url);
-    let response = reqwest::blocking::get(url)?;
+    let mut response = ureq::get(url).call()?;
+    let body = response.body_mut();
     let data = match cli.command() {
-        CliCommand::Meals(_) => response.json::<Data<Vec<Meal>>>()?.render(&context),
-        CliCommand::Locations => response.json::<Data<Vec<Location>>>()?.render(&context),
-        CliCommand::Allergens => response.json::<Data<Vec<Allergen>>>()?.render(&context),
+        CliCommand::Meals(_) => body.read_json::<Data<Vec<Meal>>>()?.render(&context),
+        CliCommand::Locations => body.read_json::<Data<Vec<Location>>>()?.render(&context),
+        CliCommand::Allergens => body.read_json::<Data<Vec<Allergen>>>()?.render(&context),
     };
 
     Ok(data)
