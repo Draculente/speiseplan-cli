@@ -1,10 +1,11 @@
-# Mensa CLI
+# Speiseplan CLI
 
 <p align="center">
   <img width="600" src="./demo.svg">
 </p>
 
-This command-line tool allows you to fetch the current meals from all canteens in Schleswig-Holstein. You can filter the meals based on allergens, whether they are vegetarian or not, and the location where they are offered (e.g. Mensa Lübeck or Cafeteria 1 Kiel).
+This command-line tool allows you to fetch the current meals from all canteens in Schleswig-Holstein. You can filter the meals based on allergens, whether they are vegetarian or not, and the location where they are offered (e.g. Mensa Lübeck or Cafeteria II Kiel).
+
 ## Installation
 
 To use the Mensa CLI, you can download the binary for your operating system from the [Github Release](https://github.com/Draculente/speiseplan-cli/releases) page.
