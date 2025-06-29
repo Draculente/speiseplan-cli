@@ -1,0 +1,13 @@
+url = "https://speiseplan.mcloud.digital/v2"
+
+exclude_allergens = ["GlW"]
+
+# vegan = true
+
+vegetarian = true
+
+location_codes = ["HL_CA", "HL_BB", "HL_ME"]
+
+language = "de"
+
+price_category = "student"
