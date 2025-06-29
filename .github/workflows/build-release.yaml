@@ -44,7 +44,7 @@ jobs:
               choco install openssl
          elif [  "$RUNNER_OS" == "macOS"  ]; then
               homebrew install openssl
-         else; then
+         else
               echo "Runner os not supported"
               exit 1
          fi
