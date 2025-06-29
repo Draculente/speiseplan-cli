@@ -9,7 +9,7 @@ chrono = { version = "0.4.41", features = ["serde"] }
 clap = { version = "4.5.40", features = ["derive"] }
 console = "0.16.0"
 dirs = "6.0.0"
-reqwest = { version = "0.12.20", features = ["blocking", "json", "rustls-tls"] }
+reqwest = { version = "0.12.20", features = ["blocking", "json"] }
 serde = { version = "1.0.219", features = ["serde_derive"] }
 toml = "0.8.23"
 workdays = "0.1.3"

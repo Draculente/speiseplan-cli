@@ -36,6 +36,20 @@ jobs:
         shell: bash
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
+      - name:  Install openssl
+        run:   |
+         if [ "$RUNNER_OS" == "Linux" ]; then
+              apt install openssl
+         elif [ "$RUNNER_OS" == "Windows" ]; then
+              choco install openssl
+         elif [  "$RUNNER_OS" == "macOS"  ]; then
+              homebrew install openssl
+         else; then
+              echo "Runner os not supported"
+              exit 1
+         fi
+        shell: bash
+ 
       - name: Install Rust
         # Or @nightly if you want
         uses: dtolnay/rust-toolchain@stable
