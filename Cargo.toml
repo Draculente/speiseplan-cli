@@ -13,3 +13,4 @@ reqwest = { version = "0.12.20", features = ["blocking", "json"] }
 serde = { version = "1.0.219", features = ["serde_derive"] }
 toml = "0.8.23"
 workdays = "0.1.3"
+

@@ -39,6 +39,7 @@ jobs:
       - name:  Install openssl
         run:   |
          if [ "$RUNNER_OS" == "Linux" ]; then
+              sudo apt update &&
               sudo apt install -y openssl libssl-dev
          elif [ "$RUNNER_OS" == "Windows" ]; then
               choco install openssl
@@ -59,11 +60,15 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          use-cross: true
-          command: build
-          args: --verbose --release --target ${{ matrix.target }}
+        shell: bash
+        run: cargo build --release --target ${{ matrix.target }}
+
+      #- name: Build
+        #uses: actions-rs/cargo@v1
+        #with:
+          #use-cross: true
+          #command: build
+          #args: --verbose --release --target ${{ matrix.target }}
 
       - name: Build archive
         shell: bash
