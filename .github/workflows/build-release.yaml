@@ -39,7 +39,7 @@ jobs:
       - name:  Install openssl
         run:   |
          if [ "$RUNNER_OS" == "Linux" ]; then
-              sudo apt install -y openssl
+              sudo apt install -y openssl libssl-dev
          elif [ "$RUNNER_OS" == "Windows" ]; then
               choco install openssl
          elif [  "$RUNNER_OS" == "macOS"  ]; then
