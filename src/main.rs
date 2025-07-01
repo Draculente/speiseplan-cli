@@ -20,7 +20,7 @@ fn main() {
 
 fn run() -> anyhow::Result<()> {
     let path = config_dir().ok_or(anyhow!("Failed to get the path of the config directory."))?;
-    let path = format!("{}{}", path.to_str().ok_or(anyhow!("Failed to compile config path"))?,  "/mensa/config.toml");
+    let path = format!("{}{}", path.to_str().ok_or(anyhow!("Failed to compile config path"))?,  "/speiseplan-cli/config.toml");
     let config = Config::read_from_file(path.as_str())?;
 
     let cli = Cli::parse();
