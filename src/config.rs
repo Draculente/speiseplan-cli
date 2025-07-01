@@ -20,7 +20,7 @@ pub struct Config {
 impl Config {
     pub fn read_from_file<'a>(path: &'a str) -> anyhow::Result<Self> {
         let file_content =
-            fs::read_to_string(path).map_err(|_| anyhow!("please provide the config file"))?;
+            fs::read_to_string(path).map_err(|_| anyhow!(format!("Please provide the config file at '{}'\nYou can find an example at https://github.com/Draculente/speiseplan-cli", path)))?;
         let config: Config = toml::from_str(file_content.as_str())?;
 
         Ok(config)
