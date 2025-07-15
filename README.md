@@ -32,7 +32,7 @@ price_category = "student"
 ```
 
 
-## Similar project
+## Similar projects
 
 This project uses the [Mensa API](https://github.com/Draculente/mensa-api).
 
