@@ -1,7 +1,8 @@
+use anyhow::anyhow;
+use clap::Parser;
 use dirs::config_dir;
 use speiseplan_cli::cli::Cli;
 use speiseplan_cli::cli::CliCommand;
-use clap::Parser;
 use speiseplan_cli::config::Config;
 use speiseplan_cli::model::Allergen;
 use speiseplan_cli::model::Data;
@@ -9,8 +10,6 @@ use speiseplan_cli::model::Location;
 use speiseplan_cli::model::Meal;
 use speiseplan_cli::view::Context;
 use speiseplan_cli::view::View;
-use anyhow::anyhow;
-
 
 fn main() {
     if let Err(e) = run() {
@@ -20,7 +19,12 @@ fn main() {
 
 fn run() -> anyhow::Result<()> {
     let path = config_dir().ok_or(anyhow!("Failed to get the path of the config directory."))?;
-    let path = format!("{}{}", path.to_str().ok_or(anyhow!("Failed to compile config path"))?,  "/speiseplan-cli/config.toml");
+    let path = format!(
+        "{}{}",
+        path.to_str()
+            .ok_or(anyhow!("Failed to compile config path"))?,
+        "/speiseplan-cli/config.toml"
+    );
     let config = Config::read_from_file(path.as_str())?;
 
     let cli = Cli::parse();
