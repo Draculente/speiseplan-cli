@@ -1,3 +1,5 @@
+use crate::url::UrlParams;
+use crate::view::Context;
 use anyhow::anyhow;
 use chrono::DateTime;
 use chrono::Datelike;
@@ -8,8 +10,6 @@ use chrono::Weekday;
 use clap::Args;
 use clap::Parser;
 use clap::Subcommand;
-use crate::url::UrlParams;
-use crate::view::Context;
 
 #[derive(Args, Debug, Clone, PartialEq, Eq)]
 pub struct MealArgs {
@@ -81,21 +81,24 @@ impl Cli {
                     .ok_or(anyhow!("Failed to calcuate date to show"));
             }
         }
-        let show_day = if now.hour() >= 15 {
-            if now.weekday().is_weekend() || now.weekday() == Weekday::Fri {
-                now.checked_add_days(Days::new(Weekday::Mon.days_since(now.weekday()).into()))
-                    .expect("There is a next monday.")
-            } else {
-                now.checked_add_days(Days::new(1))
-                    .expect("There is a next day.")
-            }
-        } else {
-            now
-        };
-        Ok(show_day)
+        Ok(get_next_open_mensa_date(chrono::Local::now()))
     }
 }
 
+fn get_next_open_mensa_date(now: DateTime<Local>) -> DateTime<Local> {
+    let show_day = if now.hour() >= 15 || now.weekday().is_weekend() {
+        if now.weekday().is_weekend() || now.weekday() == Weekday::Fri {
+            now.checked_add_days(Days::new(Weekday::Mon.days_since(now.weekday()).into()))
+                .expect("There is a next monday.")
+        } else {
+            now.checked_add_days(Days::new(1))
+                .expect("There is a next day.")
+        }
+    } else {
+        now
+    };
+    show_day
+}
 
 trait Weekend {
     fn is_weekend(&self) -> bool;
@@ -114,5 +117,3 @@ impl Weekend for Weekday {
         }
     }
 }
-
-
